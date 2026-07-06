@@ -6,6 +6,15 @@ import { isENVDev } from "@calcom/lib/env";
 import { getAdditionalEmailHeaders } from "./getAdditionalEmailHeaders";
 
 function detectTransport(): SendmailTransport.Options | SMTPConnection.Options | string {
+  // COSMABL fork patch (PRD §11.1): branded MailerSend, fed by our cal-webhook,
+  // owns every user-facing email. cal.diy must never send. jsonTransport
+  // serializes the message to JSON and returns without delivering — no SMTP, no
+  // sendmail binary, no thrown errors. Survives env-var mistakes: as long as
+  // this flag is set, nothing goes out regardless of EMAIL_SERVER_* values.
+  if (process.env.CALDIY_DISABLE_EMAILS === "1") {
+    return { jsonTransport: true } as SMTPConnection.Options;
+  }
+
   if (process.env.RESEND_API_KEY) {
     const transport = {
       host: "smtp.resend.com",

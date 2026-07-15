@@ -17,7 +17,6 @@ import { Credits } from "@calcom/ui/components/credits";
 import { ButtonOrLink } from "@calcom/ui/components/dropdown";
 import { Icon } from "@calcom/ui/components/icon";
 import { ArrowLeftIcon, ArrowRightIcon } from "@coss/ui/icons";
-import { Logo } from "@calcom/ui/components/logo";
 import { SkeletonText } from "@calcom/ui/components/skeleton";
 import { Tooltip } from "@calcom/ui/components/tooltip";
 
@@ -81,10 +80,20 @@ export function SideBar({ bannersHeight, user }: SideBarProps) {
       <aside
         style={!isPlatformPages ? sidebarStylingAttributes : {}}
         className={classNames(
-          "bg-cal-muted border-muted fixed left-0 hidden h-full w-14 flex-col overflow-y-auto overflow-x-hidden border-r md:sticky md:flex lg:w-56 lg:px-3",
+          // COSMABL: light sage tint in light mode (keeps cal muted in dark).
+          "bg-[#eef1e7] dark:bg-cal-muted border-muted fixed left-0 hidden h-full w-14 flex-col overflow-y-auto overflow-x-hidden border-r md:sticky md:flex lg:w-56 lg:px-3",
           !isPlatformPages && "max-h-screen"
         )}>
         <div className="flex h-full flex-col justify-between py-3 lg:pt-4">
+          {/* COSMABL brand header (expanded sidebar) */}
+          <Link
+            href="/availability"
+            className="mb-3 hidden flex-col items-start gap-0.5 px-1.5 lg:flex">
+            <img src="/cosmabl-logotype.svg" alt="COSMABL" className="h-5 w-auto" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9caa84]">
+              Calendar
+            </span>
+          </Link>
           <header className="todesktop:-mt-3 todesktop:flex-col-reverse todesktop:[-webkit-app-region:drag] items-center justify-between md:hidden lg:flex">
             {user?.org ? (
               !ENABLE_PROFILE_SWITCHER ? (
@@ -134,9 +143,9 @@ export function SideBar({ bannersHeight, user }: SideBarProps) {
               <KBarTrigger />
             </div>
           </header>
-          {/* logo icon for tablet */}
-          <Link href="/event-types" className="text-center md:inline lg:hidden">
-            <Logo small icon />
+          {/* COSMABL icon for collapsed/tablet sidebar */}
+          <Link href="/availability" className="text-center md:inline lg:hidden">
+            <img src="/cosmabl-logo.svg" alt="COSMABL" className="mx-auto h-7 w-7" />
           </Link>
           <Navigation isPlatformNavigation={isPlatformPages} />
         </div>

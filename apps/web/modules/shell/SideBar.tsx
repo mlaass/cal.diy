@@ -85,12 +85,13 @@ export function SideBar({ bannersHeight, user }: SideBarProps) {
           !isPlatformPages && "max-h-screen"
         )}>
         <div className="flex h-full flex-col justify-between py-3 lg:pt-4">
-          {/* COSMABL brand header (expanded sidebar) */}
+          {/* COSMABL brand header (expanded sidebar) — dark COSMABL-green block so
+              the gold logotype (and its white/green emblem) reads with contrast. */}
           <Link
             href="/availability"
-            className="mb-3 hidden flex-col items-start gap-0.5 px-1.5 lg:flex">
-            <img src="/cosmabl-logotype.svg" alt="COSMABL" className="h-5 w-auto" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9caa84]">
+            className="mb-3 hidden w-full flex-col items-start gap-1 rounded-lg bg-[#424224] px-3 py-3 lg:flex">
+            <img src="/cosmabl-logotype.svg" alt="COSMABL" className="h-6 w-auto" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#b9c79b]">
               Calendar
             </span>
           </Link>
@@ -143,9 +144,11 @@ export function SideBar({ bannersHeight, user }: SideBarProps) {
               <KBarTrigger />
             </div>
           </header>
-          {/* COSMABL icon for collapsed/tablet sidebar */}
-          <Link href="/availability" className="text-center md:inline lg:hidden">
-            <img src="/cosmabl-logo.svg" alt="COSMABL" className="mx-auto h-7 w-7" />
+          {/* COSMABL icon for collapsed/tablet sidebar (matching dark-green chip) */}
+          <Link
+            href="/availability"
+            className="mx-auto mb-2 hidden h-9 w-9 items-center justify-center rounded-lg bg-[#424224] md:flex lg:hidden">
+            <img src="/cosmabl-logo.svg" alt="COSMABL" className="h-6 w-6" />
           </Link>
           <Navigation isPlatformNavigation={isPlatformPages} />
         </div>

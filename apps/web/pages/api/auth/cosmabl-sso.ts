@@ -63,10 +63,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Shape mirrors packages/features/auth/lib/next-auth-options.ts session/jwt
   // callbacks. upId "usr-<id>" is the personal-profile id cal.com expects.
+  // `sub` is REQUIRED: getServerSession (packages/features/auth/lib/getServerSession.ts)
+  // bails when !token.sub and reads the user id from it, so tRPC's authed
+  // procedures (viewer.me, etc.) 401 without it — even though NextAuth's own
+  // /api/auth/session reads token.id and looks fine. A real Credentials login
+  // gets sub auto-populated by NextAuth; a hand-encoded token must set it.
   const sessionToken = await encode({
     secret: nextAuthSecret,
     maxAge: SESSION_MAX_AGE,
     token: {
+      sub: String(user.id),
       id: user.id,
       name: user.name,
       email: user.email,

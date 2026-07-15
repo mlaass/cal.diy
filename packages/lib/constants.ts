@@ -35,11 +35,13 @@ export const WEBAPP_URL_FOR_OAUTH = IS_PRODUCTION || IS_DEV ? WEBAPP_URL : "http
 /** @deprecated use `WEBAPP_URL` */
 export const BASE_URL = WEBAPP_URL;
 export const WEBSITE_URL = ensureProtocol(process.env.NEXT_PUBLIC_WEBSITE_URL) || "https://cal.com";
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Cal.com";
+// COSMABL: default the app/company name to COSMABL (env still overrides). These
+// NEXT_PUBLIC_* are build-time-inlined, so the default is what ships in the image.
+export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "COSMABL";
 export const SUPPORT_MAIL_ADDRESS = process.env.NEXT_PUBLIC_SUPPORT_MAIL_ADDRESS || "help@cal.com";
-export const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME || "Cal.com, Inc.";
+export const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME || "COSMABL";
 export const SENDER_ID = process.env.NEXT_PUBLIC_SENDER_ID || "Cal";
-export const SENDER_NAME = process.env.NEXT_PUBLIC_SENDGRID_SENDER_NAME || "Cal.com";
+export const SENDER_NAME = process.env.NEXT_PUBLIC_SENDGRID_SENDER_NAME || "COSMABL";
 export const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || APP_NAME;
 
 // This is the URL from which all Cal Links and their assets are served.
@@ -159,8 +161,10 @@ export const CREDENTIAL_SYNC_ENDPOINT = process.env.CALCOM_CREDENTIAL_SYNC_ENDPO
 // Service Account Encryption Key for encrypting/decrypting service account keys
 export const SERVICE_ACCOUNT_ENCRYPTION_KEY = process.env.CALCOM_SERVICE_ACCOUNT_ENCRYPTION_KEY;
 
-export const DEFAULT_LIGHT_BRAND_COLOR = "#292929";
-export const DEFAULT_DARK_BRAND_COLOR = "#fafafa";
+// COSMABL brand gold (matches --primary in the COSMABL app). Drives --cal-brand
+// (accent/CTA color) for users without a per-user brandColor set.
+export const DEFAULT_LIGHT_BRAND_COLOR = "#ccab6a";
+export const DEFAULT_DARK_BRAND_COLOR = "#ccab6a";
 
 export const TOP_BANNER_HEIGHT = 40;
 

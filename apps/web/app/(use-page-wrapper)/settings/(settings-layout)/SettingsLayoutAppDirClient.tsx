@@ -335,6 +335,12 @@ const getTabs = (orgBranding: OrganizationBranding | null) => {
 };
 
 // The following keys are assigned to admin only
+// COSMABL: hide Settings sections practitioners shouldn't touch on the cal.diy
+// practitioner surface. Kept: my_account (incl. calendars/conferencing) + security
+// (password/2fa). Billing is handled in COSMABL; teams/org/developer/admin are out
+// of scope. Applied globally (all cal.diy users are practitioners), so even an
+// admin-impersonation launch gets the locked-down view.
+const cosmablHiddenSettingsKeys = ["billing", "developer", "teams", "other_teams", "organization", "admin"];
 const adminRequiredKeys = ["admin"];
 const organizationRequiredKeys = ["organization"];
 const organizationAdminKeys = [
@@ -460,6 +466,7 @@ const useTabs = ({
 
     // check if name is in adminRequiredKeys
     return processedTabs.filter((tab) => {
+      if (cosmablHiddenSettingsKeys.includes(tab.name)) return false; // COSMABL practitioner lockdown
       if (organizationRequiredKeys.includes(tab.name)) return !!orgBranding;
       if (tab.name === "other_teams" && !permissions?.canUpdateOrganization) return false;
 

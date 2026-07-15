@@ -202,14 +202,22 @@ const platformNavigationItems: NavigationItemType[] = [
   },
 ];
 
+// COSMABL: cal.diy is a practitioner-only surface (all users arrive via SSO from
+// COSMABL). Hide top-level nav the practitioner shouldn't use — event types are
+// managed in COSMABL and synced; teams/routing/workflows/insights are out of scope.
+// Kept: bookings, availability, apps (calendar connect). Applied globally (no role
+// needed) since the whole instance is practitioners.
+const COSMABL_HIDDEN_NAV = new Set(["event_types_page_title", "teams", "routing", "workflows", "insights"]);
+
 const useNavigationItems = (isPlatformNavigation = false) => {
   const orgBranding = useOrgBranding();
   const { hasPaidPlan, isPending } = useHasPaidPlan();
   return useMemo(() => {
     const hasAllInsightsAccess = !isPending && !!hasPaidPlan;
-    const items = !isPlatformNavigation
+    const items = (!isPlatformNavigation
       ? getNavigationItems(orgBranding, hasAllInsightsAccess)
-      : platformNavigationItems;
+      : platformNavigationItems
+    ).filter((item) => !COSMABL_HIDDEN_NAV.has(item.name));
 
     const desktopNavigationItems = items.filter((item) => item.name !== MORE_SEPARATOR_NAME);
     const mobileNavigationBottomItems = items.filter(

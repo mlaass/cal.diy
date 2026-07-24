@@ -4,6 +4,7 @@ import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
 import { getInstantBookingCreateService } from "@calcom/features/bookings/di/InstantBookingCreateService.container";
 import { checkRateLimitAndThrowError } from "@calcom/lib/checkRateLimitAndThrowError";
 import getIP from "@calcom/lib/getIP";
+import { HttpError } from "@calcom/lib/http-error";
 import { piiHasher } from "@calcom/lib/server/PiiHasher";
 import { defaultResponder } from "@calcom/lib/server/defaultResponder";
 import { CreationSource } from "@calcom/prisma/enums";
@@ -17,6 +18,10 @@ async function handler(req: NextApiRequest & { userId?: number }) {
   });
 
   const session = await getServerSession({ req });
+  // COSMABL fork: only logged-in users may book via the web app (see event.ts).
+  if (!session?.user?.id) {
+    throw new HttpError({ statusCode: 403, message: "Booking is only available through COSMABL" });
+  }
   req.userId = session?.user?.id || -1;
   req.body.creationSource = CreationSource.WEBAPP;
 

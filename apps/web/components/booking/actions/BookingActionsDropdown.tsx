@@ -64,6 +64,10 @@ interface BookingActionsDropdownProps {
   context: "list" | "details";
 }
 
+// COSMABL fork: cancellation is managed by the COSMABL app (refund flow lives
+// there) — hide cancel here; reschedule stays.
+const COSMABL_HIDE_CANCEL = true;
+
 export function BookingActionsDropdown({
   booking,
   size = "base",
@@ -573,7 +577,7 @@ export function BookingActionsDropdown({
 
     // Check report and cancel actions
     const isReportAvailable = !reportActionWithHandler.disabled;
-    const isCancelAvailable = !cancelEventAction.disabled;
+    const isCancelAvailable = !COSMABL_HIDE_CANCEL && !cancelEventAction.disabled;
 
     return (
       hasAvailablePendingAction ||
@@ -740,31 +744,35 @@ export function BookingActionsDropdown({
                 </DropdownMenuItem>
               )}
             </>
-            <DropdownMenuSeparator />
-            <Tooltip
-              content={isBookingInPast ? t("cannot_cancel_past_booking") : ""}
-              side="left"
-              open={showPastBookingCancelTooltip ? undefined : false}>
-              <DropdownMenuItem
-                className="rounded-lg"
-                key={cancelEventAction.id}
-                disabled={cancelEventAction.disabled}>
-                <DropdownItem
-                  type="button"
-                  color={cancelEventAction.color}
-                  StartIcon={cancelEventAction.icon}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsCancelDialogOpen(true);
-                  }}
-                  disabled={cancelEventAction.disabled}
-                  data-booking-uid={cancelEventAction.bookingUid}
-                  data-testid={cancelEventAction.id}
-                  className={cancelEventAction.disabled ? "text-muted" : undefined}>
-                  {cancelEventAction.label}
-                </DropdownItem>
-              </DropdownMenuItem>
-            </Tooltip>
+            {!COSMABL_HIDE_CANCEL && (
+              <>
+                <DropdownMenuSeparator />
+                <Tooltip
+                  content={isBookingInPast ? t("cannot_cancel_past_booking") : ""}
+                  side="left"
+                  open={showPastBookingCancelTooltip ? undefined : false}>
+                  <DropdownMenuItem
+                    className="rounded-lg"
+                    key={cancelEventAction.id}
+                    disabled={cancelEventAction.disabled}>
+                    <DropdownItem
+                      type="button"
+                      color={cancelEventAction.color}
+                      StartIcon={cancelEventAction.icon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsCancelDialogOpen(true);
+                      }}
+                      disabled={cancelEventAction.disabled}
+                      data-booking-uid={cancelEventAction.bookingUid}
+                      data-testid={cancelEventAction.id}
+                      className={cancelEventAction.disabled ? "text-muted" : undefined}>
+                      {cancelEventAction.label}
+                    </DropdownItem>
+                  </DropdownMenuItem>
+                </Tooltip>
+              </>
+            )}
           </DropdownMenuContent>
         </ConditionalPortal>
       </Dropdown>

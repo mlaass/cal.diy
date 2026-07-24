@@ -136,6 +136,10 @@ const ConditionalLink = ({
   );
 };
 
+// COSMABL fork: cancellation is managed by the COSMABL app (refund flow lives
+// there) — hide cancel here; reschedule stays.
+const COSMABL_HIDE_CANCEL = true;
+
 function BookingListItem(booking: BookingItemProps) {
   const parsedBooking = buildParsedBooking(booking);
   const itemRef = useRef<HTMLDivElement>(null);
@@ -504,7 +508,7 @@ function BookingListItem(booking: BookingItemProps) {
               />
             </div>
           )}
-          {shouldShowRecurringCancelAction(actionContext) && (
+          {!COSMABL_HIDE_CANCEL && shouldShowRecurringCancelAction(actionContext) && (
             <Button
               className="whitespace-nowrap"
               key="cancel"

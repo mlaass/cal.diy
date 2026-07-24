@@ -125,7 +125,7 @@ export default function Success(props: PageProps) {
   const {
     allRemainingBookings,
     isSuccessBookingPage,
-    cancel: isCancellationMode,
+    cancel: _cancelQueryParam, // COSMABL fork: ignored — see isCancellationMode below
     formerTime,
     email,
     seatReferenceUid,
@@ -133,6 +133,7 @@ export default function Success(props: PageProps) {
     rating,
     redirect_status,
   } = querySchema.parse(routerQuery);
+  const isCancellationMode = false; // COSMABL fork: ?cancel=true is disabled
 
   const attendeeTimeZone = bookingInfo?.attendees.find((attendee) => attendee.email === email)?.timeZone;
 
@@ -400,7 +401,9 @@ export default function Success(props: PageProps) {
 
   const canCancelOrReschedule = !eventType?.disableCancelling || !eventType?.disableRescheduling;
 
-  const canCancel = !eventType?.disableCancelling;
+  // COSMABL fork: cancellation is managed by the COSMABL app (refund flow) —
+  // no cancel from this page; reschedule stays.
+  const canCancel = false;
   const canReschedule = !eventType?.disableRescheduling;
 
   // Check if reschedule should be disabled due to minimum reschedule notice

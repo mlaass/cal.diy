@@ -12,8 +12,9 @@ import {
 import type { ValidationError } from "@nestjs/common";
 import { BadRequestException, Logger, ValidationPipe, VersioningType } from "@nestjs/common";
 import type { NestExpressApplication } from "@nestjs/platform-express";
+import { timingSafeEqual } from "node:crypto";
 import cookieParser from "cookie-parser";
-import { Request } from "express";
+import { Request, Response as ExpressResponse } from "express";
 import helmet from "helmet";
 import { CalendarServiceExceptionFilter } from "./filters/calendar-service-exception.filter";
 import { TRPCExceptionFilter } from "./filters/trpc-exception.filter";
@@ -40,6 +41,39 @@ export const bootstrap = (app: NestExpressApplication): NestExpressApplication =
       defaultVersion: VERSION_2024_04_15,
     });
     app.use(helmet());
+
+    // COSMABL fork: booking mutations (create/cancel/reschedule) come only from
+    // COSMABL's Edge Functions, which authenticate with a shared secret. This
+    // closes the license-free v2 API's public POST /v2/bookings surface. GETs
+    // stay open (a booking uid is a capability token). Registered before Nest's
+    // RewriterMiddleware, so both /api/v2/* and /v2/* spellings are matched.
+    // Fails closed (503) when CALDIY_API_GATE_SECRET is unset.
+    const cosmablGateSecret = process.env.CALDIY_API_GATE_SECRET;
+    app.use((req: Request, res: ExpressResponse, next: () => void) => {
+      const path = req.url.startsWith("/api/v2") ? req.url.slice(4) : req.url;
+      const isBookingMutation =
+        path.startsWith("/v2/bookings") && !["GET", "OPTIONS", "HEAD"].includes(req.method);
+      if (!isBookingMutation) return next();
+      const key = req.headers["x-cosmabl-key"];
+      const ok =
+        !!cosmablGateSecret &&
+        typeof key === "string" &&
+        key.length === cosmablGateSecret.length &&
+        timingSafeEqual(Buffer.from(key), Buffer.from(cosmablGateSecret));
+      if (!ok) {
+        return res.status(cosmablGateSecret ? 401 : 503).json({
+          status: "error",
+          error: {
+            code: "COSMABL_BOOKING_GATE",
+            message: cosmablGateSecret
+              ? "Bookings are managed by COSMABL"
+              : "CALDIY_API_GATE_SECRET is not configured",
+          },
+        });
+      }
+      return next();
+    });
+
     app.enableCors({
       origin: "*",
       methods: ["GET", "PATCH", "DELETE", "HEAD", "POST", "PUT", "OPTIONS"],

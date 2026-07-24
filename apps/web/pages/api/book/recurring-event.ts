@@ -4,6 +4,7 @@ import { getRecurringBookingService } from "@calcom/features/bookings/di/Recurri
 import type { BookingResponse } from "@calcom/features/bookings/types";
 import { checkRateLimitAndThrowError } from "@calcom/lib/checkRateLimitAndThrowError";
 import getIP from "@calcom/lib/getIP";
+import { HttpError } from "@calcom/lib/http-error";
 import { piiHasher } from "@calcom/lib/server/PiiHasher";
 import { checkCfTurnstileToken } from "@calcom/lib/server/checkCfTurnstileToken";
 import { defaultResponder } from "@calcom/lib/server/defaultResponder";
@@ -40,6 +41,10 @@ async function handler(req: NextApiRequest & RequestMeta) {
     identifier: `createRecurringBooking:${piiHasher.hash(userIp)}`,
   });
   const session = await getServerSession({ req });
+  // COSMABL fork: only logged-in users may book via the web app (see event.ts).
+  if (!session?.user?.id) {
+    throw new HttpError({ statusCode: 403, message: "Booking is only available through COSMABL" });
+  }
   /* To mimic API behavior and comply with types */
 
   const recurringBookingService = getRecurringBookingService();

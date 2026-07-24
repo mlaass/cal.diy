@@ -7,6 +7,7 @@ import { EventTypeRepository } from "@calcom/features/eventtypes/repositories/ev
 import { FeaturesRepository } from "@calcom/features/flags/features.repository";
 import { checkRateLimitAndThrowError } from "@calcom/lib/checkRateLimitAndThrowError";
 import getIP from "@calcom/lib/getIP";
+import { HttpError } from "@calcom/lib/http-error";
 import { piiHasher } from "@calcom/lib/server/PiiHasher";
 import { checkCfTurnstileToken } from "@calcom/lib/server/checkCfTurnstileToken";
 import { defaultResponder } from "@calcom/lib/server/defaultResponder";
@@ -40,6 +41,11 @@ async function handler(req: NextApiRequest & { userId?: number; traceContext: Tr
   });
 
   const session = await getServerSession({ req });
+  // COSMABL fork: only logged-in users (practitioners, e.g. in-app reschedule) may
+  // book via the web app. Client bookings go through COSMABL's paid wizard → v2 API.
+  if (!session?.user?.id) {
+    throw new HttpError({ statusCode: 403, message: "Booking is only available through COSMABL" });
+  }
   /* To mimic API behavior and comply with types */
   req.body = {
     ...req.body,

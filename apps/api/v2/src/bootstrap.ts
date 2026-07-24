@@ -50,7 +50,10 @@ export const bootstrap = (app: NestExpressApplication): NestExpressApplication =
     // Fails closed (503) when CALDIY_API_GATE_SECRET is unset.
     const cosmablGateSecret = process.env.CALDIY_API_GATE_SECRET;
     app.use((req: Request, res: ExpressResponse, next: () => void) => {
-      const path = req.url.startsWith("/api/v2") ? req.url.slice(4) : req.url;
+      // req.path (parsed pathname, handles absolute-form targets), lowercased —
+      // Express routes case-insensitively, so the gate must too.
+      const pathname = (req.path || "").toLowerCase();
+      const path = pathname.startsWith("/api/v2") ? pathname.slice(4) : pathname;
       const isBookingMutation =
         path.startsWith("/v2/bookings") && !["GET", "OPTIONS", "HEAD"].includes(req.method);
       if (!isBookingMutation) return next();
